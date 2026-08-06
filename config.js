@@ -33,6 +33,6 @@ const CONFIG = {
 
   // ---- Supabase 配置：用来保存"悄悄话"留言，实现双方实时互动 ----
   // 按 README.md 里的步骤申请后，把下面两项换成你自己的
-  supabaseUrl: "YOUR_SUPABASE_URL",
-  supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY",
+  supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co",
+  supabaseAnonKey: "sb_publishable_Z5VwMxgAkbDAXp7rPxm9OA_L6Csz7Tj",
 };
