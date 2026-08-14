@@ -8,9 +8,9 @@ const isConfigured =
   CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" &&
   CONFIG.supabaseAnonKey && CONFIG.supabaseAnonKey !== "YOUR_SUPABASE_ANON_KEY";
 
-let supabase = null;
+let sb = null;
 if (isConfigured) {
-  supabase = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+  sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 } else {
   console.warn("Supabase 还没配置，先在 js/config.js 里填好 URL 和 anon key。");
 }
@@ -50,8 +50,8 @@ function enterScene(who) {
   enterOverlay.classList.add("is-hidden");
 }
 
-document.getElementById("enterHer").addEventListener("click", () => enterScene("W"));
-document.getElementById("enterMe").addEventListener("click", () => enterScene("M"));
+document.getElementById("enterHer").addEventListener("click", () => enterScene("她"));
+document.getElementById("enterMe").addEventListener("click", () => enterScene("我"));
 enterSkip.addEventListener("click", () => {
   localStorage.removeItem(ID_KEY);
   showEnterOverlay();
@@ -208,15 +208,15 @@ document.querySelectorAll(".modal-backdrop").forEach((bd) => {
 // 反应（表情）
 // ===================================================
 async function fetchReactions(postId) {
-  if (!supabase) return [];
-  const { data, error } = await supabase.from("reactions").select("*").eq("post_id", postId);
+  if (!sb) return [];
+  const { data, error } = await sb.from("reactions").select("*").eq("post_id", postId);
   if (error) { console.error(error); return []; }
   return data || [];
 }
 
 function renderReactionsRow(container, postId, reactionRows) {
   container.innerHTML = "";
-  const me = getIdentity() || "M";
+  const me = getIdentity() || "我";
   CONFIG.reactions.forEach((emoji) => {
     const rows = reactionRows.filter((r) => r.emoji === emoji);
     const mine = rows.some((r) => r.author === me);
@@ -225,12 +225,12 @@ function renderReactionsRow(container, postId, reactionRows) {
     chip.className = "reaction-chip" + (mine ? " is-mine" : "");
     chip.innerHTML = `<span>${emoji}</span>${rows.length ? `<span class="reaction-chip__count">${rows.length}</span>` : ""}`;
     chip.addEventListener("click", async () => {
-      if (!supabase) return;
+      if (!sb) return;
       if (mine) {
         const mineRow = rows.find((r) => r.author === me);
-        await supabase.from("reactions").delete().eq("id", mineRow.id);
+        await sb.from("reactions").delete().eq("id", mineRow.id);
       } else {
-        await supabase.from("reactions").insert({ post_id: postId, author: me, emoji });
+        await sb.from("reactions").insert({ post_id: postId, author: me, emoji });
       }
       const fresh = await fetchReactions(postId);
       renderReactionsRow(container, postId, fresh);
@@ -243,8 +243,8 @@ function renderReactionsRow(container, postId, reactionRows) {
 // 评论
 // ===================================================
 async function fetchComments(postId) {
-  if (!supabase) return [];
-  const { data, error } = await supabase
+  if (!sb) return [];
+  const { data, error } = await sb
     .from("comments").select("*").eq("post_id", postId).order("created_at", { ascending: true });
   if (error) { console.error(error); return []; }
   return data || [];
@@ -252,7 +252,7 @@ async function fetchComments(postId) {
 
 function renderCommentBubble(container, c) {
   const el = document.createElement("div");
-  const isMe = c.author === "M";
+  const isMe = c.author === "我";
   el.className = `bubble ${isMe ? "bubble--me" : "bubble--her"}`;
   const name = isMe ? CONFIG.myName : CONFIG.friendName;
   el.innerHTML = `
@@ -292,10 +292,10 @@ function buildCommentsBlock(postId, comments) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = textarea.value.trim();
-    if (!text || !supabase) return;
+    if (!text || !sb) return;
     sendBtn.disabled = true;
-    const author = getIdentity() || "M";
-    const { data, error } = await supabase
+    const author = getIdentity() || "我";
+    const { data, error } = await sb
       .from("comments").insert({ post_id: postId, author, content: text }).select();
     sendBtn.disabled = false;
     if (error) { console.error(error); return; }
@@ -325,7 +325,7 @@ async function buildPostDetail(post) {
 
   const meta = document.createElement("div");
   meta.className = "post-view__meta";
-  const authorName = post.author === "M" ? CONFIG.myName : CONFIG.friendName;
+  const authorName = post.author === "我" ? CONFIG.myName : CONFIG.friendName;
   meta.innerHTML = `<span class="post-view__author">${escapeHTML(authorName)}</span><span class="post-view__date">${formatDate(post.created_at)}</span>`;
   wrap.appendChild(meta);
 
@@ -356,9 +356,9 @@ const fireModalBody = document.getElementById("fireModalBody");
 document.getElementById("fireBtn").addEventListener("click", async () => {
   openModal(fireModalBackdrop);
   fireModalBody.innerHTML = `<p class="comments__empty">走近篝火…</p>`;
-  if (!supabase) { fireModalBody.innerHTML = `<p class="comments__empty">还没有连接数据库，按 README 配置好 Supabase 后就能用了。</p>`; return; }
+  if (!sb) { fireModalBody.innerHTML = `<p class="comments__empty">还没有连接数据库，按 README 配置好 Supabase 后就能用了。</p>`; return; }
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("posts").select("*").order("created_at", { ascending: false }).limit(1);
   if (error) { console.error(error); fireModalBody.innerHTML = `<p class="comments__empty">加载失败。</p>`; return; }
   if (!data || data.length === 0) {
@@ -380,9 +380,9 @@ document.getElementById("windowModalTitle").textContent = `${CONFIG.windowTag}�
 document.getElementById("windowBtn").addEventListener("click", async () => {
   openModal(windowModalBackdrop);
   windowGalleryGrid.innerHTML = `<p class="comments__empty">推开窗…</p>`;
-  if (!supabase) { windowGalleryGrid.innerHTML = `<p class="comments__empty">还没有连接数据库。</p>`; return; }
+  if (!sb) { windowGalleryGrid.innerHTML = `<p class="comments__empty">还没有连接数据库。</p>`; return; }
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("posts").select("*").eq("tag", CONFIG.windowTag).order("created_at", { ascending: false });
   if (error) { console.error(error); windowGalleryGrid.innerHTML = `<p class="comments__empty">加载失败。</p>`; return; }
   if (!data || data.length === 0) {
@@ -407,9 +407,9 @@ const calendarTrack = document.getElementById("calendarTrack");
 document.getElementById("calendarBtn").addEventListener("click", async () => {
   openModal(calendarModalBackdrop);
   calendarTrack.innerHTML = `<p class="calendar-empty">翻着旧照片…</p>`;
-  if (!supabase) { calendarTrack.innerHTML = `<p class="calendar-empty">还没有连接数据库。</p>`; return; }
+  if (!sb) { calendarTrack.innerHTML = `<p class="calendar-empty">还没有连接数据库。</p>`; return; }
 
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from("posts").select("*").order("created_at", { ascending: false }).limit(200);
   if (error) { console.error(error); calendarTrack.innerHTML = `<p class="calendar-empty">加载失败。</p>`; return; }
   if (!data || data.length === 0) {
@@ -443,25 +443,25 @@ document.getElementById("pWhoHer").textContent = CONFIG.friendName;
 document.getElementById("pWhoMe").textContent = CONFIG.myName;
 
 fabAdd.addEventListener("click", () => {
-  const me = getIdentity() || "M";
+  const me = getIdentity() || "我";
   setPostSender(me);
   openModal(postModalBackdrop);
 });
 document.getElementById("postCancel").addEventListener("click", () => closeModal(postModalBackdrop));
 document.getElementById("postModalClose").addEventListener("click", () => closeModal(postModalBackdrop));
 
-let currentSenderPost = "M";
-document.getElementById("pWhoHer").addEventListener("click", () => setPostSender("W"));
-document.getElementById("pWhoMe").addEventListener("click", () => setPostSender("M"));
+let currentSenderPost = "我";
+document.getElementById("pWhoHer").addEventListener("click", () => setPostSender("她"));
+document.getElementById("pWhoMe").addEventListener("click", () => setPostSender("我"));
 function setPostSender(who) {
   currentSenderPost = who;
-  document.getElementById("pWhoW").classList.toggle("is-active", who === "W");
-  document.getElementById("pWhoM").classList.toggle("is-active", who === "M");
+  document.getElementById("pWhoHer").classList.toggle("is-active", who === "她");
+  document.getElementById("pWhoMe").classList.toggle("is-active", who === "我");
 }
 
 postForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (!supabase) return;
+  if (!sb) return;
   const file = postFile.files[0];
   if (!file) return;
 
@@ -471,13 +471,13 @@ postForm.addEventListener("submit", async (e) => {
   try {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await sb.storage
       .from(CONFIG.storageBucket).upload(path, file, { cacheControl: "3600", upsert: false });
     if (uploadError) throw uploadError;
 
-    const { data: pub } = supabase.storage.from(CONFIG.storageBucket).getPublicUrl(path);
+    const { data: pub } = sb.storage.from(CONFIG.storageBucket).getPublicUrl(path);
 
-    const { error: insertError } = await supabase.from("posts").insert({
+    const { error: insertError } = await sb.from("posts").insert({
       author: currentSenderPost,
       caption: postCaption.value.trim() || null,
       media_url: pub.publicUrl,
