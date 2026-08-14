@@ -3,14 +3,14 @@
 // ============================================
 const CONFIG = {
   siteTitle: "篝火旁",
-  friendName: "她",   // 换成朋友的真实称呼
-  myName: "我",        // 换成你自己的称呼
+  friendName: "W",   
+  myName: "M",  
 
   greeting: "推开这扇夜色，篝火一直在这儿等你。",
 
   // Supabase 项目配置
-  supabaseUrl: "YOUR_SUPABASE_URL",
-  supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY",
+  supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co/rest/v1/",
+  supabaseAnonKey: "sb_publishable_Z5VwMxgAkbDAXp7rPxm9OA_L6Csz7Tj",
   storageBucket: "media",
 
   // 可点的表情反应
