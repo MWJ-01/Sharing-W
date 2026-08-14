@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+<title>篝火旁</title>
+
+<!-- PWA / 添加到主屏幕 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e1a2b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="篝火旁">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============ 进场：选身份 + 触发音效 ============ -->
+  <div class="enter-overlay" id="enterOverlay">
+    <p class="enter-overlay__title" id="enterTitle">推开这扇夜色，篝火一直在这儿等你</p>
+    <p class="enter-overlay__sub" id="enterSub">先告诉我，屏幕前的你是——</p>
+    <div class="enter-overlay__who">
+      <button class="enter-btn" data-who="她" id="enterHer">她</button>
+      <button class="enter-btn" data-who="我" id="enterMe">我</button>
+    </div>
+    <button class="enter-overlay__again" id="enterSkip" hidden>不是ta，重新选</button>
+  </div>
+
+  <!-- ============ 场景 ============ -->
+  <div class="scene" aria-hidden="false">
+    <div class="sky"></div>
+    <div class="stars" id="stars"></div>
+    <div class="sea"><div class="sea__shimmer"></div></div>
+    <div class="sand"></div>
+
+    <div class="palm palm--left"><svg viewBox="0 0 100 160"><path d="M55 160 L60 60 C40 55 25 40 15 15 C30 25 45 35 60 40 C55 25 55 10 65 0 C68 20 68 35 62 45 C75 35 88 30 100 32 C88 42 72 48 60 48 C68 55 72 65 68 78 C60 65 55 55 58 60 L64 160 Z" /></svg></div>
+    <div class="palm palm--right"><svg viewBox="0 0 100 160"><path d="M55 160 L60 60 C40 55 25 40 15 15 C30 25 45 35 60 40 C55 25 55 10 65 0 C68 20 68 35 62 45 C75 35 88 30 100 32 C88 42 72 48 60 48 C68 55 72 65 68 78 C60 65 55 55 58 60 L64 160 Z" /></svg></div>
+
+    <div class="cabin" id="cabin">
+      <div class="cabin__roof"></div>
+      <div class="cabin__body">
+        <button class="window-btn" id="windowBtn" aria-label="看看窗外的风景"></button>
+        <span class="window-hint">窗外的风景</span>
+      </div>
+    </div>
+
+    <div class="chair chair--left"><svg viewBox="0 0 60 80"><path d="M8 80 L12 40 L20 40 L20 10 L40 10 L40 40 L48 40 L52 80 L44 80 L42 50 L18 50 L16 80 Z"/></svg></div>
+    <div class="chair chair--right"><svg viewBox="0 0 60 80"><path d="M8 80 L12 40 L20 40 L20 10 L40 10 L40 40 L48 40 L52 80 L44 80 L42 50 L18 50 L16 80 Z"/></svg></div>
+
+    <div class="campfire" id="campfire">
+      <div class="campfire__glow"></div>
+      <div class="campfire__logs"><span class="log log--a"></span><span class="log log--b"></span></div>
+      <div class="flame"></div>
+      <div class="flame flame--2"></div>
+      <div class="embers" id="embers"></div>
+      <button class="fire-hit" id="fireBtn" aria-label="查看最新分享"></button>
+      <span class="fire-hint">点一下篝火</span>
+    </div>
+  </div>
+
+  <!-- ============ 顶部工具条 ============ -->
+  <header class="topbar">
+    <span class="topbar__brand" id="brandTitle">篝火旁</span>
+    <button class="icon-btn" id="calendarBtn" aria-label="翻看以前的分享">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>
+      </svg>
+    </button>
+  </header>
+
+  <button class="icon-btn sound-btn" id="soundBtn" aria-label="声音开关">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="soundIcon">
+      <path d="M4 9v6h4l5 5V4L8 9H4Z"/><path d="M16 8a5 5 0 0 1 0 8"/>
+    </svg>
+  </button>
+
+  <button class="fab" id="fabAdd" aria-label="分享一张">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <!-- ============ 篝火：最新分享 + 互动 ============ -->
+  <div class="modal-backdrop" id="fireModalBackdrop">
+    <div class="modal" style="position:relative">
+      <button class="modal__close" id="fireModalClose" aria-label="关闭">✕</button>
+      <p class="modal__title">今晚的分享</p>
+      <div id="fireModalBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ 窗户：风景相册 ============ -->
+  <div class="modal-backdrop" id="windowModalBackdrop">
+    <div class="modal" style="position:relative">
+      <button class="modal__close" id="windowModalClose" aria-label="关闭">✕</button>
+      <p class="modal__title" id="windowModalTitle">窗外的风景</p>
+      <div class="window-gallery__grid" id="windowGalleryGrid"></div>
+    </div>
+  </div>
+
+  <!-- ============ 日历：全部分享 ============ -->
+  <div class="modal-backdrop calendar-overlay" id="calendarModalBackdrop">
+    <div class="modal" style="position:relative">
+      <button class="modal__close" id="calendarModalClose" aria-label="关闭">✕</button>
+      <p class="modal__title">左右滑动，翻看每一天</p>
+      <div class="calendar-track" id="calendarTrack"></div>
+    </div>
+  </div>
+
+  <!-- ============ 发布新分享 ============ -->
+  <div class="modal-backdrop" id="postModalBackdrop">
+    <div class="modal" style="position:relative">
+      <button class="modal__close" id="postModalClose" aria-label="关闭">✕</button>
+      <p class="modal__title">分享一张</p>
+      <form id="postForm">
+        <div class="composer__who" role="radiogroup" aria-label="选择发布身份" id="postWho">
+          <button type="button" class="who-btn" data-sender="她" id="pWhoHer">她</button>
+          <button type="button" class="who-btn" data-sender="我" id="pWhoMe">我</button>
+        </div>
+        <input type="file" id="postFile" accept="image/*,image/gif" required />
+        <textarea id="postCaption" placeholder="配一句话（可以留空）" rows="2" maxlength="300"></textarea>
+        <input type="text" id="postTag" placeholder="标个类别，比如 风景（会出现在小屋窗户里，可留空）" maxlength="30" />
+        <div class="modal__actions">
+          <button type="button" class="modal__cancel" id="postCancel">取消</button>
+          <button type="submit" class="modal__submit" id="postSubmit">发布</button>
+        </div>
+        <p class="modal__hint" id="postHint"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
