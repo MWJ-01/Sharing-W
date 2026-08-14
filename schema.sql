@@ -4,7 +4,7 @@
 
 create table if not exists posts (
   id bigint generated always as identity primary key,
-  author text not null check (author in ('我', '她')),
+  author text not null check (author in ('M', 'W')),
   caption text,
   media_url text not null,
   tag text,                         -- 可选，标了这个词的照片会出现在小屋窗户的相册里
@@ -14,7 +14,7 @@ create table if not exists posts (
 create table if not exists comments (
   id bigint generated always as identity primary key,
   post_id bigint not null references posts(id) on delete cascade,
-  author text not null check (author in ('我', '她')),
+  author text not null check (author in ('M', 'W')),
   content text not null check (char_length(content) <= 1000),
   created_at timestamptz not null default now()
 );
@@ -23,7 +23,7 @@ create table if not exists comments (
 create table if not exists reactions (
   id bigint generated always as identity primary key,
   post_id bigint not null references posts(id) on delete cascade,
-  author text not null check (author in ('我', '她')),
+  author text not null check (author in ('M', 'W')),
   emoji text not null,
   created_at timestamptz not null default now()
 );
@@ -33,15 +33,15 @@ alter table comments enable row level security;
 alter table reactions enable row level security;
 
 create policy "任何人可读动态" on posts for select using (true);
-create policy "任何人可发动态" on posts for insert with check (author in ('我', '她'));
+create policy "任何人可发动态" on posts for insert with check (author in ('M', 'W'));
 
 create policy "任何人可读评论" on comments for select using (true);
 create policy "任何人可发评论" on comments for insert with check (
-  author in ('我', '她') and char_length(content) <= 1000
+  author in ('M', 'W') and char_length(content) <= 1000
 );
 
 create policy "任何人可读反应" on reactions for select using (true);
-create policy "任何人可发反应" on reactions for insert with check (author in ('我', '她'));
+create policy "任何人可发反应" on reactions for insert with check (author in ('M', 'W'));
 create policy "任何人可删反应" on reactions for delete using (true);
 
 alter publication supabase_realtime add table posts;
