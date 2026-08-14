@@ -9,7 +9,7 @@ const CONFIG = {
   greeting: "推开这扇夜色，篝火一直在这儿等你。",
 
   // Supabase 项目配置
-  supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co/rest/v1/",
+  supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co",
   supabaseAnonKey: "sb_publishable_Z5VwMxgAkbDAXp7rPxm9OA_L6Csz7Tj",
   storageBucket: "media",
 
