@@ -27,8 +27,8 @@ const enterTitle = document.getElementById("enterTitle");
 const enterSub = document.getElementById("enterSub");
 const enterSkip = document.getElementById("enterSkip");
 
-document.getElementById("enterW").textContent = CONFIG.friendName;
-document.getElementById("enterM").textContent = CONFIG.myName;
+document.getElementById("enterHer").textContent = CONFIG.friendName;
+document.getElementById("enterMe").textContent = CONFIG.myName;
 
 function showEnterOverlay() {
   const existing = getIdentity();
@@ -50,8 +50,8 @@ function enterScene(who) {
   enterOverlay.classList.add("is-hidden");
 }
 
-document.getElementById("enterW").addEventListener("click", () => enterScene("W"));
-document.getElementById("enterM").addEventListener("click", () => enterScene("M"));
+document.getElementById("enterHer").addEventListener("click", () => enterScene("她"));
+document.getElementById("enterMe").addEventListener("click", () => enterScene("我"));
 enterSkip.addEventListener("click", () => {
   localStorage.removeItem(ID_KEY);
   showEnterOverlay();
