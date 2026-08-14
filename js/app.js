@@ -50,8 +50,8 @@ function enterScene(who) {
   enterOverlay.classList.add("is-hidden");
 }
 
-document.getElementById("enterHer").addEventListener("click", () => enterScene("她"));
-document.getElementById("enterMe").addEventListener("click", () => enterScene("我"));
+document.getElementById("enterHer").addEventListener("click", () => enterScene("W"));
+document.getElementById("enterMe").addEventListener("click", () => enterScene("M"));
 enterSkip.addEventListener("click", () => {
   localStorage.removeItem(ID_KEY);
   showEnterOverlay();
@@ -216,7 +216,7 @@ async function fetchReactions(postId) {
 
 function renderReactionsRow(container, postId, reactionRows) {
   container.innerHTML = "";
-  const me = getIdentity() || "我";
+  const me = getIdentity() || "M";
   CONFIG.reactions.forEach((emoji) => {
     const rows = reactionRows.filter((r) => r.emoji === emoji);
     const mine = rows.some((r) => r.author === me);
@@ -252,7 +252,7 @@ async function fetchComments(postId) {
 
 function renderCommentBubble(container, c) {
   const el = document.createElement("div");
-  const isMe = c.author === "我";
+  const isMe = c.author === "M";
   el.className = `bubble ${isMe ? "bubble--me" : "bubble--her"}`;
   const name = isMe ? CONFIG.myName : CONFIG.friendName;
   el.innerHTML = `
@@ -294,7 +294,7 @@ function buildCommentsBlock(postId, comments) {
     const text = textarea.value.trim();
     if (!text || !supabase) return;
     sendBtn.disabled = true;
-    const author = getIdentity() || "我";
+    const author = getIdentity() || "M";
     const { data, error } = await supabase
       .from("comments").insert({ post_id: postId, author, content: text }).select();
     sendBtn.disabled = false;
@@ -325,7 +325,7 @@ async function buildPostDetail(post) {
 
   const meta = document.createElement("div");
   meta.className = "post-view__meta";
-  const authorName = post.author === "我" ? CONFIG.myName : CONFIG.friendName;
+  const authorName = post.author === "M" ? CONFIG.myName : CONFIG.friendName;
   meta.innerHTML = `<span class="post-view__author">${escapeHTML(authorName)}</span><span class="post-view__date">${formatDate(post.created_at)}</span>`;
   wrap.appendChild(meta);
 
@@ -443,20 +443,20 @@ document.getElementById("pWhoHer").textContent = CONFIG.friendName;
 document.getElementById("pWhoMe").textContent = CONFIG.myName;
 
 fabAdd.addEventListener("click", () => {
-  const me = getIdentity() || "我";
+  const me = getIdentity() || "M";
   setPostSender(me);
   openModal(postModalBackdrop);
 });
 document.getElementById("postCancel").addEventListener("click", () => closeModal(postModalBackdrop));
 document.getElementById("postModalClose").addEventListener("click", () => closeModal(postModalBackdrop));
 
-let currentSenderPost = "我";
-document.getElementById("pWhoHer").addEventListener("click", () => setPostSender("她"));
-document.getElementById("pWhoMe").addEventListener("click", () => setPostSender("我"));
+let currentSenderPost = "M";
+document.getElementById("pWhoHer").addEventListener("click", () => setPostSender("W"));
+document.getElementById("pWhoMe").addEventListener("click", () => setPostSender("M"));
 function setPostSender(who) {
   currentSenderPost = who;
-  document.getElementById("pWhoHer").classList.toggle("is-active", who === "她");
-  document.getElementById("pWhoMe").classList.toggle("is-active", who === "我");
+  document.getElementById("pWhoW").classList.toggle("is-active", who === "W");
+  document.getElementById("pWhoM").classList.toggle("is-active", who === "M");
 }
 
 postForm.addEventListener("submit", async (e) => {
