@@ -6,7 +6,7 @@ const CONFIG = {
   friendName: "W",   
   myName: "M",  
 
-  greeting: "推开这扇夜色，篝火一直在这儿等你。",
+  greeting: "全岛由特约精灵独家罩着，请放心作法，一切有我。",
 
   // Supabase 项目配置
   supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co",
