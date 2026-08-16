@@ -2,7 +2,7 @@
 // 唯一需要经常改的文件
 // ============================================
 const CONFIG = {
-  siteTitle: "篝火旁",
+  siteTitle: "🏖️WXQ私人海滩🏖️",
   friendName: "W",   
   myName: "M",  
 
