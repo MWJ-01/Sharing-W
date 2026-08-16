@@ -33,11 +33,11 @@ document.getElementById("enterM").textContent = CONFIG.myName;
 function showEnterOverlay() {
   const existing = getIdentity();
   if (existing) {
-    enterTitle.textContent = CONFIG.greeting || "篝火一直在这儿等你";
+    enterTitle.textContent = CONFIG.greeting || "全岛由特约精灵独家罩着，请放心作法，一切有我。";
     enterSub.textContent = `欢迎回来，${existing === "M" ? CONFIG.myName : CONFIG.friendName}`;
     enterSkip.hidden = false;
   } else {
-    enterTitle.textContent = CONFIG.greeting || "篝火一直在这儿等你";
+    enterTitle.textContent = CONFIG.greeting || "全岛由特约精灵独家罩着，请放心作法，一切有我。";
     enterSub.textContent = "先告诉我，屏幕前的你是——";
     enterSkip.hidden = true;
   }
