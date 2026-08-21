@@ -1,0 +1,356 @@
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#0b1220}
+
+.stage{position:fixed;inset:0;overflow:hidden;z-index:0;font-family:"Noto Serif SC",serif;
+  transition:filter 1.6s ease}
+
+/* ---- 昼夜色板：JS 只改这些变量 ---- */
+.stage{
+  --s1:#050a18; --s2:#0c1531; --s3:#1a2145; --s4:#2c3155;   /* 天空四段 */
+  --hz:rgba(120,150,190,.32);                                /* 地平线雾光 */
+  --sea1:#3a4a68; --sea2:#1b2740; --sea3:#0b1122;            /* 海 */
+  --sand1:#8e8271; --sand2:#6a5f52; --sand3:#413a33;         /* 沙 */
+  --amb:#0a0d14;                                             /* 物体受环境光 */
+  --wood:#141119;                                            /* 木头 */
+  --leaf:#12241c; --bloom:#c9748a;                           /* 绿植 */
+  --ink:rgba(255,228,186,.96); --inkGlow:rgba(255,168,86,.6); /* 飘起来的字 */
+  --sink:rgba(255,244,222,.5); --sinkEdge:rgba(40,28,16,.45); /* 沙地上的字 */
+  --star:1; --sunO:0; --sunY:52%; --lamp:1; --fire:1; --warm:0;
+}
+
+.sky{position:absolute;inset:0;
+  background:
+    radial-gradient(120% 52% at 50% 56%, var(--hz), transparent 68%),
+    linear-gradient(180deg,var(--s1) 0%,var(--s2) 24%,var(--s3) 40%,var(--s4) 52%);
+  transition:background 1.6s ease}
+.stars{position:absolute;inset:0 0 52%;opacity:var(--star);transition:opacity 1.6s ease}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:tw 4s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:.95}}
+.sun{position:absolute;left:64%;top:var(--sunY);width:120px;height:120px;margin-left:-60px;border-radius:50%;
+  background:radial-gradient(circle,#fff7e2 22%,#ffdda0 55%,#ffb46e);
+  box-shadow:0 0 90px 34px rgba(255,196,130,.45),0 0 240px 120px rgba(255,170,110,.22);
+  opacity:var(--sunO);transition:opacity 1.6s ease,top 1.6s ease}
+
+/* ---- 远海：只有薄薄一条，重点在浪 ---- */
+.sea{position:absolute;left:0;right:0;top:52%;height:13%;
+  background:linear-gradient(180deg,var(--sea1) 0%,var(--sea2) 55%,var(--sea3) 100%);
+  transition:background 1.6s ease}
+.sea::before{content:"";position:absolute;inset:0 0 auto;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);filter:blur(1.5px)}
+.surf{position:absolute;left:-6%;right:-6%;height:5px;border-radius:50%;filter:blur(3px);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 20%,rgba(255,255,255,.7) 55%,transparent);
+  animation:roll 9s ease-in-out infinite}
+@keyframes roll{0%,100%{transform:translateY(0) scaleX(1);opacity:.35}
+  45%{transform:translateY(7px) scaleX(1.04);opacity:.8}}
+.wetline{position:absolute;left:0;right:0;top:64.4%;height:26px;filter:blur(9px);
+  background:radial-gradient(70% 100% at 50% 20%,rgba(230,240,250,.4),transparent 72%)}
+
+/* ---- 沙滩：占画面大半，带起伏 ---- */
+.sand{position:absolute;left:0;right:0;top:64%;bottom:0;
+  background:linear-gradient(180deg,var(--sand1) 0%,var(--sand2) 42%,var(--sand3) 100%);
+  transition:background 1.6s ease}
+.dune{position:absolute;left:-10%;right:-10%;border-radius:50%;filter:blur(16px);mix-blend-mode:overlay}
+.d1{top:66%;height:60px;background:rgba(255,240,215,.16)}
+.d2{top:74%;height:80px;background:rgba(0,0,0,.16)}
+.d3{top:86%;height:120px;background:rgba(255,240,215,.10)}
+.ripple-sand{position:absolute;left:0;right:0;top:64%;bottom:0;opacity:.10;pointer-events:none;
+  background:repeating-linear-gradient(96deg,rgba(255,255,255,.5) 0 1px,transparent 1px 26px)}
+
+/* ---- 小屋：左侧，带门廊柱子和一串暖灯 ---- */
+.cabin{position:absolute;left:2%;top:38%;width:340px}
+.cabin__roof{position:relative;height:70px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--wood) 78%,#fff) 0%,var(--wood) 100%);
+  clip-path:polygon(0 100%,50% 0,100% 100%);
+  filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
+.cabin__eave{height:8px;margin:-2px -14px 0;background:var(--wood);border-radius:2px}
+.cabin__body{position:relative;height:132px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--wood) 88%,#fff) 0%,var(--wood) 100%);
+  border-radius:0 0 3px 3px}
+.cabin__inner{position:absolute;left:14px;right:14px;top:16px;height:74px;border-radius:2px;
+  background:linear-gradient(180deg,#ffd9a3,#ffb974);
+  box-shadow:0 0 40px 14px rgba(255,190,120,calc(.5*var(--lamp)));
+  opacity:calc(.35 + .65*var(--lamp));transition:opacity 1.6s ease}
+.cabin__inner::before,.cabin__inner::after{content:"";position:absolute;background:var(--wood)}
+.cabin__inner::before{left:33%;top:0;bottom:0;width:4px}
+.cabin__inner::after{left:66%;top:0;bottom:0;width:4px}
+.cabin__posts{position:absolute;left:0;right:0;bottom:0;height:132px}
+.cabin__posts i{position:absolute;bottom:0;width:9px;height:100%;background:var(--wood)}
+.cabin__posts i:nth-child(1){left:4px}
+.cabin__posts i:nth-child(2){left:50%;margin-left:-4px}
+.cabin__posts i:nth-child(3){right:4px}
+.cabin__deck{position:absolute;left:-10px;right:-10px;bottom:-14px;height:16px;border-radius:2px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--wood) 70%,#fff),var(--wood))}
+/* 屋檐下的一串小灯 */
+.lights{position:absolute;left:8px;right:8px;top:66px;display:flex;justify-content:space-between}
+.lights b{width:7px;height:7px;border-radius:50%;background:#ffe0ad;
+  box-shadow:0 0 12px 5px rgba(255,205,140,calc(.85*var(--lamp)));
+  opacity:calc(.25 + .75*var(--lamp));animation:bulb 4s ease-in-out infinite}
+@keyframes bulb{0%,100%{filter:brightness(.9)}50%{filter:brightness(1.25)}}
+
+/* ---- 绿植：海边的低矮草丛和灌木 ---- */
+.grass{position:absolute;transform-origin:bottom center;pointer-events:none}
+.grass i{position:absolute;bottom:0;left:50%;transform-origin:bottom center;
+  background:var(--leaf);border-radius:60% 60% 2px 2px/95% 95% 2px 2px;transition:background 1.6s ease}
+.bush{position:absolute;pointer-events:none;transform-origin:bottom center}
+.bush i{position:absolute;bottom:0;left:50%;border-radius:52% 52% 44% 44%;
+  background:var(--leaf);transition:background 1.6s ease}
+.bush b{position:absolute;width:6px;height:6px;border-radius:50%;
+  background:var(--bloom);opacity:.85;transition:background 1.6s ease}
+@keyframes leafsway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.8deg)}}
+
+/* ---- 信箱 ---- */
+.mailbox{position:absolute;right:26%;bottom:16%;width:76px;height:150px;cursor:pointer;z-index:5}
+.mailbox__post{position:absolute;left:50%;bottom:0;width:11px;height:96px;margin-left:-5.5px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--wood) 70%,#fff),var(--wood));
+  transition:background 1.6s ease}
+.mailbox__box{position:absolute;left:0;top:0;width:76px;height:52px;border-radius:26px 26px 4px 4px;
+  background:linear-gradient(160deg,#3f6ea0 0%,#2b4f7b 55%,#1c3452 100%);
+  box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,220,200,.22);
+  transition:transform .3s ease}
+.mailbox__door{position:absolute;right:5px;top:9px;width:9px;height:34px;border-radius:3px;
+  background:rgba(215,235,255,.24)}
+.mailbox__flag{position:absolute;left:-10px;top:4px;width:7px;height:32px;border-radius:2px;
+  background:var(--wood);transform-origin:bottom center;transform:rotate(74deg);
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.mailbox__flag::after{content:"";position:absolute;left:5px;top:0;width:19px;height:14px;border-radius:2px;
+  background:#e6a23c;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.mailbox.has-mail .mailbox__flag{transform:rotate(0deg)}
+.mailbox__glow{position:absolute;left:50%;top:26px;width:190px;height:190px;margin:-95px 0 0 -95px;
+  border-radius:50%;pointer-events:none;opacity:0;transition:opacity .35s ease;
+  background:radial-gradient(closest-side,rgba(255,214,150,.32),transparent 70%)}
+.mailbox:hover .mailbox__glow,.mailbox.has-mail .mailbox__glow{opacity:1}
+.mailbox.has-mail .mailbox__box{animation:mailnudge 3.4s ease-in-out infinite}
+@keyframes mailnudge{0%,92%,100%{transform:translateY(0)}96%{transform:translateY(-3px)}}
+.mailbox__hint{position:absolute;left:50%;top:-30px;transform:translateX(-50%) translateY(6px);
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;white-space:nowrap;
+  color:rgba(255,236,210,.92);text-shadow:0 2px 14px rgba(0,0,0,.75);
+  opacity:0;transition:opacity .3s ease,transform .3s ease}
+.mailbox:hover .mailbox__hint{opacity:1;transform:translateX(-50%) translateY(0)}
+.mailbox__hit{position:absolute;inset:-14px;background:none;border:none;cursor:pointer}
+
+/* ---- 小屋可点：之后用来进屋内 ---- */
+.cabin{cursor:pointer}
+.cabin__hit{position:absolute;inset:-10px -14px -20px;background:transparent;border:none;cursor:pointer;z-index:3}
+.cabin__hint{position:absolute;left:50%;top:-34px;transform:translateX(-50%) translateY(6px);
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;white-space:nowrap;
+  color:rgba(255,236,210,.9);text-shadow:0 2px 14px rgba(0,0,0,.7);
+  opacity:0;transition:opacity .3s ease,transform .3s ease;pointer-events:none;z-index:4}
+.cabin__hint{display:none}
+.cabin__lit{position:absolute;inset:-6px -10px -14px;border-radius:6px;pointer-events:none;
+  box-shadow:0 0 0 0 rgba(255,214,150,0);transition:box-shadow .35s ease}
+.cabin:hover .cabin__lit{box-shadow:0 0 46px 8px rgba(255,214,150,.34)}
+
+/* ---- 火：粒子 canvas，每帧都在变 ---- */
+
+/* ---- 火塘 ---- */
+.pit{position:absolute;left:47%;top:76%;width:210px;height:110px;margin-left:-105px}
+.pit__glow{position:absolute;left:50%;top:-70px;width:520px;height:330px;margin-left:-260px;
+  background:radial-gradient(closest-side,rgba(255,176,100,calc(.55*var(--fire))),transparent 72%);
+  animation:pulse 3.6s ease-in-out infinite;pointer-events:none}
+@keyframes pulse{0%,100%{opacity:.75}50%{opacity:1}}
+.pit__ring{position:absolute;left:50%;top:40px;width:150px;height:44px;margin-left:-75px;border-radius:50%;
+  background:radial-gradient(50% 60% at 50% 40%,#2a2119,#191309);
+  box-shadow:0 8px 26px rgba(0,0,0,.55),inset 0 3px 10px rgba(255,170,100,.45)}
+.pit__stones{position:absolute;left:50%;top:36px;width:170px;height:52px;margin-left:-85px}
+.pit__stones i{position:absolute;width:26px;height:17px;border-radius:50%;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--amb) 60%,#8a7f70),var(--amb))}
+.flame{position:absolute;left:50%;top:8px;margin-left:-19px;width:38px;height:62px;
+  border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:linear-gradient(0deg,#d9481f,#f0862f 45%,#f6c15a 76%,#fff3cd);
+  filter:blur(.8px);transform-origin:bottom center;animation:fa 1.7s ease-in-out infinite}
+.flame--2{width:22px;height:40px;margin-left:-11px;top:26px;
+  background:linear-gradient(0deg,#f0862f,#fff6da);animation:fb 1.3s ease-in-out infinite}
+@keyframes fa{0%,100%{transform:scaleY(1)}35%{transform:scaleY(1.14) skewX(-3deg)}70%{transform:scaleY(.94) skewX(3deg)}}
+@keyframes fb{0%,100%{transform:scaleY(1)}40%{transform:scaleY(1.22) skewX(4deg)}}
+.smoke{position:absolute;left:50%;top:-10px;width:60px;height:60px;margin-left:-30px;border-radius:50%;
+  background:radial-gradient(circle,rgba(220,215,210,.20),transparent 70%);filter:blur(9px);
+  animation:smoke 7s linear infinite}
+@keyframes smoke{0%{transform:translate(0,0) scale(.6);opacity:0}20%{opacity:.55}
+  100%{transform:translate(26px,-190px) scale(1.9);opacity:0}}
+.embers{position:absolute;inset:0;pointer-events:none}
+.ember{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffc27a;
+  filter:blur(.6px);animation:rise linear forwards}
+@keyframes rise{0%{transform:translate(0,0);opacity:.95}100%{transform:translate(var(--dx),-170px) scale(.3);opacity:0}}
+
+/* ===================================================
+   信：选项弹窗 → 封蜡信 → 展开阅读 → 回信 / 已阅
+   =================================================== */
+.veil{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(6,5,10,.72);backdrop-filter:blur(10px);padding:24px;
+  font-family:"Noto Serif SC",serif}
+.veil.on{display:flex}
+
+/* 选项弹窗 */
+.choice{width:100%;max-width:340px;text-align:center;
+  background:linear-gradient(170deg,#241c15,#191310);border:1px solid rgba(255,225,190,.16);
+  border-radius:18px;padding:30px 26px 26px;box-shadow:0 30px 70px -24px rgba(0,0,0,.9);
+  animation:pop .32s cubic-bezier(.34,1.4,.64,1) both}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.choice__icon{font-size:30px;line-height:1;margin-bottom:12px;filter:drop-shadow(0 4px 12px rgba(255,180,110,.4))}
+.choice__title{font-size:18px;color:#f6e8d4;margin:0 0 6px}
+.choice__sub{font-size:12.5px;color:rgba(246,232,212,.55);margin:0 0 22px;font-family:"JetBrains Mono",monospace;letter-spacing:.08em}
+.choice__btns{display:flex;flex-direction:column;gap:10px}
+.btn{border:none;border-radius:999px;padding:13px 20px;font-size:14.5px;cursor:pointer;
+  font-family:"Noto Serif SC",serif;transition:transform .18s ease,filter .18s ease}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn--main{background:linear-gradient(160deg,#e7c489,#cf9f57);color:#2a1e10;font-weight:600}
+.btn--ghost{background:transparent;color:rgba(246,232,212,.8);border:1px solid rgba(255,225,190,.22)}
+.btn--wax{background:linear-gradient(160deg,#b8503f,#8e3227);color:#ffeadf}
+.veil__x{position:absolute;top:20px;right:22px;width:38px;height:38px;border-radius:50%;
+  border:none;background:rgba(255,255,255,.08);color:#f6e8d4;font-size:15px;cursor:pointer}
+
+/* 封着蜡的信封 */
+.envelope{position:relative;width:min(420px,86vw);aspect-ratio:1.55;cursor:pointer;
+  animation:pop .4s cubic-bezier(.34,1.4,.64,1) both;perspective:900px}
+.envelope__body{position:absolute;inset:0;border-radius:3px;
+  background:
+    repeating-linear-gradient(92deg,rgba(120,84,48,.05) 0 2px,transparent 2px 5px),
+    repeating-linear-gradient(2deg,rgba(90,60,30,.045) 0 3px,transparent 3px 7px),
+    linear-gradient(158deg,#c9a274 0%,#b98f5f 48%,#a67c4e 100%);
+  box-shadow:0 26px 60px -18px rgba(0,0,0,.8),inset 0 0 70px rgba(90,58,26,.3)}
+.envelope__body::before,.envelope__body::after{content:"";position:absolute;bottom:0;width:52%;height:100%}
+.envelope__body::before{left:0;background:linear-gradient(112deg,rgba(0,0,0,.10) 50%,transparent 50%)}
+.envelope__body::after{right:0;background:linear-gradient(248deg,rgba(0,0,0,.10) 50%,transparent 50%)}
+.envelope__flap{position:absolute;left:0;right:0;top:0;height:52%;transform-origin:top center;
+  background:
+    repeating-linear-gradient(92deg,rgba(120,84,48,.05) 0 2px,transparent 2px 5px),
+    linear-gradient(178deg,#c49b6b,#ac8155);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:0 6px 14px -6px rgba(0,0,0,.5);transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.envelope__stamp{position:absolute;right:16px;top:14px;width:52px;height:62px;border-radius:2px;
+  background:linear-gradient(160deg,#9fb6c4,#6d8898);opacity:.75;
+  -webkit-mask-image:radial-gradient(circle at 4px 4px,transparent 3px,#000 3.5px);
+  mask-image:radial-gradient(circle at 4px 4px,transparent 3px,#000 3.5px);
+  -webkit-mask-size:9px 9px;mask-size:9px 9px}
+.envelope__to{position:absolute;left:30px;bottom:26px;font-family:"Ma Shan Zheng",serif;
+  font-size:22px;color:#3f2c17;opacity:.85;transform:rotate(-2deg)}
+.envelope__stamp{filter:saturate(.7)}
+.seal{position:absolute;left:50%;top:52%;width:78px;height:78px;margin:-39px 0 0 -39px;z-index:3;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(42% 40% at 36% 30%,#c4574a,#8e2c22 58%,#63180f);
+  box-shadow:0 10px 22px -8px rgba(0,0,0,.8),inset 0 -5px 12px rgba(0,0,0,.4),inset 0 5px 10px rgba(255,160,130,.3);
+  /* 蜡自然摊开的不规则边 */
+  border-radius:47% 53% 44% 56%/52% 46% 54% 48%;
+  transform:rotate(-6deg);
+  transition:transform .45s ease,opacity .45s ease}
+.seal::before{content:"";position:absolute;inset:-6px;
+  border-radius:46% 54% 52% 48%/48% 52% 46% 54%;
+  background:radial-gradient(closest-side,rgba(120,36,24,.55),transparent 78%);z-index:-1}
+.seal svg{width:38px;height:38px;opacity:.85;
+  filter:drop-shadow(0 1px 0 rgba(255,180,150,.35)) drop-shadow(0 -1px 1px rgba(60,14,8,.6))}
+.envelope__hint{position:absolute;left:50%;bottom:-38px;transform:translateX(-50%);white-space:nowrap;
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;color:rgba(255,236,210,.6)}
+.envelope.opening .envelope__flap{transform:rotateX(-172deg)}
+.envelope.opening .seal{transform:scale(.6) rotate(26deg) translateY(10px);opacity:0}
+.envelope.opening{animation:envout .5s .45s ease-in forwards}
+@keyframes envout{to{opacity:0;transform:translateY(-24px) scale(1.06)}}
+
+/* 展开的信纸 */
+.paper{position:relative;width:min(720px,92vw);max-height:88vh;overflow-y:auto;
+  padding:clamp(34px,5vw,58px) clamp(30px,5vw,56px) 26px;border-radius:2px;
+  color:#3a2716;
+  background:
+    repeating-linear-gradient(180deg,rgba(90,60,28,.10) 0 1px,transparent 1px 40px),
+    repeating-linear-gradient(93deg,rgba(120,84,48,.055) 0 2px,transparent 2px 6px),
+    repeating-linear-gradient(3deg,rgba(90,60,30,.05) 0 3px,transparent 3px 8px),
+    radial-gradient(130% 70% at 18% 0%,rgba(226,190,146,.55),transparent 62%),
+    linear-gradient(168deg,#d8b489 0%,#caa274 46%,#b98e5c 100%);
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9),inset 0 0 90px rgba(84,52,20,.22);
+  animation:unfold .55s cubic-bezier(.2,.8,.3,1) both;
+  transform-origin:center top}
+@keyframes unfold{from{opacity:0;transform:scaleY(.55) translateY(-30px)}to{opacity:1;transform:none}}
+.paper::before{content:"";position:absolute;left:0;right:0;top:33%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(120,92,58,.28),transparent)}
+.paper::after{content:"";position:absolute;left:0;right:0;top:66%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(120,92,58,.24),transparent)}
+.paper__date{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+  color:rgba(62,40,16,.72);margin-bottom:20px}
+.paper__body{font-family:"Ma Shan Zheng","Kaiti SC",serif;font-size:clamp(20px,2.4vw,25px);
+  line-height:2.05;white-space:pre-wrap;text-wrap:pretty;margin:0 0 26px}
+.paper__sign{text-align:right;font-family:"Ma Shan Zheng",serif;font-size:21px;color:#4a3018}
+.paper__acts{display:flex;gap:10px;justify-content:flex-end;margin-top:30px;
+  padding-top:20px;border-top:1px dashed rgba(120,92,58,.3)}
+.btn--paper{background:#4a3018;color:#f0dcc0}
+.btn--paperghost{background:transparent;color:#54381d;border:1px solid rgba(74,48,24,.45)}
+.paper.closing{animation:refold .55s ease-in forwards}
+@keyframes refold{to{opacity:0;transform:scaleY(.5) translateY(-40px)}}
+
+/* 写信 */
+.paper textarea{width:100%;min-height:34vh;background:transparent;border:none;outline:none;resize:none;
+  font-family:"Ma Shan Zheng","Kaiti SC",serif;font-size:clamp(20px,2.4vw,25px);line-height:2.05;color:#3a2716}
+.paper textarea::placeholder{color:rgba(62,40,16,.38)}
+.paper__acts{border-top-color:rgba(74,48,24,.35)}
+.paper::before,.paper::after{background:linear-gradient(90deg,transparent,rgba(74,48,24,.26),transparent)}
+
+.grain{position:absolute;inset:-50%;opacity:.13;pointer-events:none;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1.1s steps(3) infinite}
+@keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-6px,4px)}66%{transform:translate(5px,-5px)}}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 92% at 50% 52%,transparent 40%,rgba(4,6,12,.7) 100%)}
+
+
+/* 沙滩上的纸条（纯文字分享） */
+.bottles{position:absolute;inset:0;pointer-events:none;z-index:4}
+.bottle{position:absolute;pointer-events:auto;max-width:136px;
+  font-family:"Ma Shan Zheng","Kaiti SC",serif;font-size:14px;color:#3d2d1a;
+  background:linear-gradient(160deg,#f0dfbe,#ddc79c);
+  border:none;border-radius:2px;padding:8px 11px;cursor:pointer;
+  transform:rotate(var(--tilt,-4deg));
+  box-shadow:0 8px 16px -8px rgba(0,0,0,.75);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:transform .2s ease}
+.bottle:hover{transform:rotate(var(--tilt,-4deg)) translateY(-3px)}
+
+/* 篝火的点击区和提示 */
+.fire-hit{position:absolute;left:50%;top:10px;width:150px;height:120px;margin-left:-75px;
+  background:transparent;border:none;border-radius:50%;cursor:pointer;z-index:3}
+.fire-hint{position:absolute;left:50%;top:-24px;transform:translateX(-50%);
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;white-space:nowrap;
+  color:rgba(255,236,210,.65);text-shadow:0 2px 10px rgba(0,0,0,.7);
+  opacity:0;transition:opacity .3s ease;pointer-events:none}
+.fire-hint{display:none}
+
+/* 夜里的信封：深蓝星纸 */
+.envelope--night .envelope__body{
+  background:
+    radial-gradient(130% 90% at 50% 55%,rgba(90,150,220,.28),transparent 62%),
+    linear-gradient(158deg,#2c4f80 0%,#1f3c66 52%,#152a4b 100%);
+  box-shadow:0 26px 70px -18px rgba(0,0,0,.9),inset 0 0 80px rgba(10,20,45,.6)}
+.envelope--night .envelope__flap{
+  background:linear-gradient(178deg,#2f5488,#22406c);
+  box-shadow:0 8px 18px -6px rgba(0,0,0,.7)}
+.envelope--night .envelope__to{color:rgba(220,235,255,.8);text-shadow:0 0 12px rgba(140,190,255,.5)}
+.envelope--night .envelope__stamp{background:linear-gradient(160deg,#7f9fc4,#4a6b95);opacity:.55}
+.envelope--night .envelope__hint{color:rgba(210,230,255,.6)}
+.env-stars{position:absolute;inset:0;overflow:hidden;border-radius:3px;pointer-events:none}
+.env-stars i{position:absolute;border-radius:50%;background:#fff;animation:tw 4s ease-in-out infinite}
+.env-halo{position:absolute;left:50%;top:52%;width:230px;height:230px;margin:-115px 0 0 -115px;
+  pointer-events:none;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(140,200,255,.45),rgba(90,150,230,.15) 55%,transparent 74%);
+  animation:pulse 4.5s ease-in-out infinite}
+
+/* 星形火漆 */
+.seal--star{background:none;box-shadow:none;border-radius:0;transform:rotate(0deg);
+  width:96px;height:96px;margin:-48px 0 0 -48px}
+.seal--star svg{width:96px;height:96px;opacity:1;
+  filter:drop-shadow(0 0 16px rgba(255,178,80,.75)) drop-shadow(0 0 40px rgba(120,180,255,.5))}
+.seal--star::before{display:none}
+.envelope.opening .seal--star{transform:scale(.55) rotate(30deg) translateY(14px);opacity:0}
+
+/* 夜里的信纸：星夜蓝 */
+.paper--night{color:#dce8f8;
+  background:
+    radial-gradient(120% 60% at 20% 0%,rgba(90,150,220,.22),transparent 62%),
+    repeating-linear-gradient(180deg,rgba(190,220,255,.07) 0 1px,transparent 1px 40px),
+    linear-gradient(168deg,#22406c 0%,#1a3358 48%,#122540 100%);
+  box-shadow:0 40px 100px -30px rgba(0,0,0,.95),inset 0 0 90px rgba(8,16,36,.5)}
+.paper--night .paper__date{color:rgba(200,222,250,.6)}
+.paper--night .paper__sign{color:rgba(224,238,255,.9)}
+.paper--night .paper__acts{border-top-color:rgba(170,205,245,.28)}
+.paper--night::before,.paper--night::after{background:linear-gradient(90deg,transparent,rgba(170,205,245,.22),transparent)}
+.paper--night .btn--paper{background:#e0a95c;color:#22314a}
+.paper--night .btn--paperghost{color:rgba(214,232,255,.85);border-color:rgba(170,205,245,.35)}
+.paper--night textarea{color:#dce8f8}
+.paper--night textarea::placeholder{color:rgba(200,222,250,.35)}
