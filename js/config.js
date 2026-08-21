@@ -9,7 +9,7 @@ const CONFIG = {
   greeting: "全岛由特约精灵独家罩着，请放心作法，一切有我。",
 
   // 进站口令：把下面这行改成你和她约定的口令（留空 "" 就不需要口令）
-  passcode: "1314",
+  passcode: "0330",
 
   // Supabase 项目配置
   supabaseUrl: "https://hqaizhpmbyotnphyzfbj.supabase.co",
