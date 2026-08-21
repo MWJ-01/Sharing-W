@@ -4,8 +4,8 @@
 document.title = CONFIG.siteTitle;
 
 const isConfigured =
-  CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "YOUR_SUPABASE_URL" &&
-  CONFIG.supabaseAnonKey && CONFIG.supabaseAnonKey !== "YOUR_SUPABASE_ANON_KEY";
+  CONFIG.supabaseUrl && CONFIG.supabaseUrl !== "https://hqaizhpmbyotnphyzfbj.supabase.co" &&
+  CONFIG.supabaseAnonKey && CONFIG.supabaseAnonKey !== "sb_publishable_Z5VwMxgAkbDAXp7rPxm9OA_L6Csz7Tj";
 
 let sb = null;
 if (isConfigured && window.supabase) {
